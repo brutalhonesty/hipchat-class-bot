@@ -21,7 +21,7 @@ querystring = require 'querystring'
 cheerio = require 'cheerio'
 request = require 'request'
 url = process.env.HEROKU_URL
-botName = HUBOT_HIPCHAT_USERNAME
+botName = process.env.HUBOT_HIPCHAT_USERNAME
 
 module.exports = (robot) ->
 
