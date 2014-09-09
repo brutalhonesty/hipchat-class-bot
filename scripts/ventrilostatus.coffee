@@ -2,10 +2,15 @@
 #   Gets current Ventrilo status or clients connected.
 #
 # Dependencies:
-#   None
+#   "cheerio": "^0.17.0"
+#   "querystring": "^0.2.0"
+#   "request": "^2.42.0"
+#   hipchat-api script from "hubot-scripts"
 #
 # Configuration:
-#   None
+#   HUBOT_HIPCHAT_USERNAME - The Bots username to display
+#   HUBOT_HIPCHAT_ROOMS - The rooms the bot is assigned to
+#   HEROKU_URL - The url of the bot server.
 #
 # Commands:
 #   hubot ventrilostatus info <ip address | hostname> <port number> - Returns the status of the server.
@@ -13,6 +18,12 @@
 #
 # Author:
 #   brutalhonesty
+
+querystring = require 'querystring'
+cheerio = require 'cheerio'
+request = require 'request'
+url = process.env.HEROKU_URL or null
+botName = process.env.HUBOT_HIPCHAT_USERNAME or null
 
 module.exports = (robot) ->
 
@@ -30,6 +41,15 @@ module.exports = (robot) ->
       msg.send body.name + " has been up for " + body.uptime + " seconds and has " + body.client.length + " clients connected."
 
   robot.respond /ventrilostatus clients ((\d?\d?\d)\.(\d?\d?\d)\.(\d?\d?\d)\.(\d?\d?\d)) (\d+)/i, (msg) ->
+    unless url
+      msg.send "Please set the HEROKU_URL environment variable."
+      return
+    unless botName
+      msg.send "Please set the HUBOT_HIPCHAT_USERNAME environment variable."
+      return
+    unless process.env.HUBOT_HIPCHAT_ROOMS
+      msg.send "Please set the HUBOT_HIPCHAT_ROOMS environment variable."
+      return
     msg.http("http://ventrilostatus.net/json/" + msg.match[1] + ":" + msg.match[6]  + "/")
     .header("Accept", "application/json")
     .get() (err, res, body) ->
@@ -40,4 +60,18 @@ module.exports = (robot) ->
       if body.error
         msg.send body.error
         return
-      msg.send JSON.stringify body.client
+      $ = cheerio.load('<table></table>')
+      $('table').append('<tr><th>User</th><th>Admin</th><th>Ping</th><th>Comment</th></tr>')
+      for client in body.client
+        $('table').append('<tr><td>'+ client.name + '</td><td>'+ client.admin + '</td><td>'+ client.ping + '</td><td>'+ client.comm or '' + '</td></tr>')
+      response = {}
+      response.color = 'green'
+      response.room_id = process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0].split('@')[0].split('_')[1]
+      response.notify = true
+      response.message_format = 'html'
+      response.from = botName
+      response.message = $.html()
+      params = querystring.stringify(response)
+      request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
+        if error
+          msg.send error
