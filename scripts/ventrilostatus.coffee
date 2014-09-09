@@ -63,7 +63,7 @@ module.exports = (robot) ->
       $ = cheerio.load('<table></table>')
       $('table').append('<tr><th>User</th><th>Admin</th><th>Ping</th><th>Comment</th></tr>')
       for client in body.client
-        $('table').append('<tr><td>'+ client.name + '</td><td>'+ client.admin + '</td><td>'+ client.ping + '</td><td>'+ client.comm or '' + '</td></tr>')
+        $('table').append('<tr><td>'+ client.name + '</td><td>'+ client.admin ? '&#x2713;' : '&#x2717;' + '</td><td>'+ client.ping + '</td><td>'+ client.comm or '' + '</td></tr>')
       response = {}
       response.color = 'green'
       response.room_id = process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0].split('@')[0].split('_')[1]
