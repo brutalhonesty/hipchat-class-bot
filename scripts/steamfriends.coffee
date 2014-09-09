@@ -21,6 +21,7 @@ querystring = require 'querystring'
 cheerio = require 'cheerio'
 request = require 'request'
 url = process.env.HEROKU_URL
+botName = HUBOT_HIPCHAT_USERNAME
 
 module.exports = (robot) ->
 
@@ -43,9 +44,8 @@ module.exports = (robot) ->
       response.room_id = process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0].split('@')[0].split('_')[1]
       response.notify = true
       response.message_format = 'html'
+      response.from = botName
       response.message = encodeURIComponent($.html())
       params = querystring.stringify(response)
-      msg.send JSON.stringify params
-      msg.send "#{url}/hubot/hipchat?#{params}"
       request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
-        throw error if error
+        if error msg.send error
