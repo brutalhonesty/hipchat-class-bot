@@ -2,11 +2,17 @@
 #   Gets the daily top10 torrents and looks up a user on What.cd
 #
 # Dependencies:
-#   None
+#   "cheerio": "^0.17.0"
+#   "querystring": "^0.2.0"
+#   "request": "^2.42.0"
+#   hipchat-api script from "hubot-scripts"
 #
 # Configuration:
 #   HUBOT_WHAT_CD_USERNAME - Your What.cd username
 #   HUBOT_WHAT_CD_PASSWORD - Your What.cd password
+#   HUBOT_HIPCHAT_USERNAME - The Bots username to display
+#   HUBOT_HIPCHAT_ROOMS - The rooms the bot is assigned to
+#   HEROKU_URL - The url of the bot server.
 #
 # Commands:
 #   hubot whatcd top10 - Returns the current daily top10 albums
@@ -15,10 +21,15 @@
 # Author:
 #   brutalhonesty
 
-module.exports = (robot) ->
+querystring = require 'querystring'
+cheerio = require 'cheerio'
+request = require 'request'
+url = process.env.HEROKU_URL or null
+botName = process.env.HUBOT_HIPCHAT_USERNAME or null
+username = process.env.HUBOT_WHAT_CD_USERNAME or null
+password = process.env.HUBOT_WHAT_CD_PASSWORD or null
 
-  username = process.env.HUBOT_WHAT_CD_USERNAME || null
-  password = process.env.HUBOT_WHAT_CD_PASSWORD || null
+module.exports = (robot) ->
 
   robot.respond /whatcd top10$/i, (msg) ->
     unless username and password
@@ -29,6 +40,15 @@ module.exports = (robot) ->
       return
     unless password
       msg.send "Please set the HUBOT_WHAT_CD_PASSWORD environment variable."
+      return
+    unless url
+      msg.send "Please set the HEROKU_URL environment variable."
+      return
+    unless botName
+      msg.send "Please set the HUBOT_HIPCHAT_USERNAME environment variable."
+      return
+    unless process.env.HUBOT_HIPCHAT_ROOMS
+      msg.send "Please set the HUBOT_HIPCHAT_ROOMS environment variable."
       return
     params = "username=" + username + "&password=" + password
     msg.http("https://what.cd")
@@ -55,7 +75,21 @@ module.exports = (robot) ->
             return
           for resp in body.response
             if resp.tag is "day"
-              msg.send JSON.stringify resp.results
+              $ = cheerio.load('<table></table>')
+              $('table').append('<tr><th>Artist</th><th>Album</th><th>Format</th><th>Encoding</th></tr>')
+              for album in resp.results
+                $('table').append('<tr><td>'+ album.artist + '</td><td>' + album.groupName + '</td><td>'+ album.format + '</td><td>'+ album.encoding + '</td></tr>')
+              response = {}
+              response.color = 'green'
+              response.room_id = process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0].split('@')[0].split('_')[1]
+              response.notify = true
+              response.message_format = 'html'
+              response.from = botName
+              response.message = $.html()
+              params = querystring.stringify(response)
+              request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
+                if error
+                  msg.send error
               return
       else
         msg.send "Error: response status code was " + res.statusCode
@@ -70,6 +104,15 @@ module.exports = (robot) ->
       return
     unless password
       msg.send "Please set the HUBOT_WHAT_CD_PASSWORD environment variable."
+      return
+    unless url
+      msg.send "Please set the HEROKU_URL environment variable."
+      return
+    unless botName
+      msg.send "Please set the HUBOT_HIPCHAT_USERNAME environment variable."
+      return
+    unless process.env.HUBOT_HIPCHAT_ROOMS
+      msg.send "Please set the HUBOT_HIPCHAT_ROOMS environment variable."
       return
     params = "username=" + username + "&password=" + password
     msg.http("https://what.cd")

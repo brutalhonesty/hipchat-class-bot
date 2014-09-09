@@ -5,6 +5,7 @@
 #   "cheerio": "^0.17.0"
 #   "querystring": "^0.2.0"
 #   "request": "^2.42.0"
+#   hipchat-api script from "hubot-scripts"
 #
 # Configuration:
 #   HUBOT_HIPCHAT_USERNAME - The Bots username to display
@@ -20,12 +21,21 @@
 querystring = require 'querystring'
 cheerio = require 'cheerio'
 request = require 'request'
-url = process.env.HEROKU_URL
-botName = process.env.HUBOT_HIPCHAT_USERNAME
+url = process.env.HEROKU_URL or null
+botName = process.env.HUBOT_HIPCHAT_USERNAME or null
 
 module.exports = (robot) ->
 
   robot.respond /steamfriends (\w+)/i, (msg) ->
+    unless url
+      msg.send "Please set the HEROKU_URL environment variable."
+      return
+    unless botName
+      msg.send "Please set the HUBOT_HIPCHAT_USERNAME environment variable."
+      return
+    unless process.env.HUBOT_HIPCHAT_ROOMS
+      msg.send "Please set the HUBOT_HIPCHAT_ROOMS environment variable."
+      return
     msg.http("http://steamfriends-brutalhonesty.rhcloud.com/getFriends")
     .header("Accept", "application/json")
     .query(type: "json", steamid: msg.match[1])
@@ -38,7 +48,7 @@ module.exports = (robot) ->
       $ = cheerio.load('<table></table>')
       $('table').append('<tr><th>Player</th><th>Game</th></tr>')
       for user in userList
-        $('table').append('<tr><td>'+ user.names + '<td>'+ user.games + '</td></td></tr>')
+        $('table').append('<tr><td>'+ user.names + '</td><td>'+ user.games + '</td></tr>')
       response = {}
       response.color = 'green'
       response.room_id = process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0].split('@')[0].split('_')[1]
