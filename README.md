@@ -1,3 +1,7 @@
+# Class-bot
+
+http://class-bot.herokuapp.com
+
 # Hubot
 
 This is a version of GitHub's Campfire bot, hubot. He's pretty cool.
