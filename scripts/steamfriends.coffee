@@ -2,16 +2,24 @@
 #   Gets current Steam Friends online for a given Steam ID
 #
 # Dependencies:
-#   None
+#   "cheerio": "^0.17.0"
+#   "querystring": "^0.2.0"
 #
 # Configuration:
-#   None
+#   HUBOT_HIPCHAT_USERNAME - The Bots username to display
+#   HUBOT_HIPCHAT_ROOMS - The rooms the bot is assigned to
+#   HEROKU_URL - The url of the bot server.
 #
 # Commands:
 #   hubot steamfriends <friend id> - Returns the list of friends online and their games.
 #
 # Author:
 #   brutalhonesty
+
+querystring = require 'querystring'
+cheerio = require 'cheerio'
+request = require 'request'
+url = process.env.HEROKU_URL
 
 module.exports = (robot) ->
 
@@ -24,4 +32,19 @@ module.exports = (robot) ->
         msg.send err
         return
       body = JSON.parse body
-      msg.send JSON.stringify body.list.user
+      userList = body.list.user
+      $ = cheerio.load('<table></table>')
+      $('table').append('<tr><th>Player</th><th>Game</th></tr>')
+      for i in userList
+        user = userList[i]
+        $('table').append('<tr><td>'+ user.names + '<td>'+ user.games + '</td></td></tr>')
+      response = {}
+      response.color = 'green'
+      response.room_id = process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0].split('@')[0].split('_')[1]
+      response.notify = true
+      response.message_format = 'html'
+      response.message = encodeURIComponent($.html())
+      params = querystring.stringify(response)
+
+      request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
+        throw error if error
