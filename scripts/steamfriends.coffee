@@ -45,7 +45,7 @@ module.exports = (robot) ->
       response.notify = true
       response.message_format = 'html'
       response.from = botName
-      response.message = encodeURIComponent($.html())
+      response.message = $.html()
       params = querystring.stringify(response)
       request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
         if error
