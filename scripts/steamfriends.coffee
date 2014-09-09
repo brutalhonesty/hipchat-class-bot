@@ -48,4 +48,5 @@ module.exports = (robot) ->
       response.message = encodeURIComponent($.html())
       params = querystring.stringify(response)
       request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
-        if error msg.send error
+        if error
+          msg.send error
