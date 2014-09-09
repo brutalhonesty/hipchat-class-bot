@@ -76,9 +76,9 @@ module.exports = (robot) ->
           for resp in body.response
             if resp.tag is "day"
               $ = cheerio.load('<table></table>')
-              $('table').append('<tr><th>Artist</th><th>Album</th><th>Format</th><th>Encoding</th></tr>')
+              $('table').append('<tr><th>Artist</th><th>Album</th><th>Format</th><th>Encoding</th><th>Seeders</th><th>Leechers</th></tr>')
               for album in resp.results
-                $('table').append('<tr><td>'+ album.artist + '</td><td>' + album.groupName + '</td><td>'+ album.format + '</td><td>'+ album.encoding + '</td></tr>')
+                $('table').append('<tr><td>'+ album.artist + '</td><td>' + album.groupName + '</td><td>'+ album.format + '</td><td>'+ album.encoding + '</td><td>'+ album.seeders + '</td><td>'+ album.leechers + '</td></tr>')
               response = {}
               response.color = 'green'
               response.room_id = process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0].split('@')[0].split('_')[1]
@@ -150,8 +150,21 @@ module.exports = (robot) ->
             if body.status is "failure"
               msg.send body.error
               return
-            userData = rank: body.response.personal.class, upload: parseInt(body.response.stats.uploaded) / 1024 / 1024 / 1024, download: parseInt(body.response.stats.downloaded) / 1024 / 1024 / 1024, ratio: body.response.stats.ratio
-            msg.send JSON.stringify userData
+            $ = cheerio.load('<table></table>')
+            $('table').append('<tr><th>Rank</th><th>Upload</th><th>Download</th><th>Ratio</th></tr>')
+            $('table').append('<tr><td>'+ body.response.personal.class + '</td><td>' + parseInt(body.response.stats.uploaded) / 1024 / 1024 / 1024 + ' GB</td><td>'+ parseInt(body.response.stats.downloaded) / 1024 / 1024 / 1024 + ' GB</td><td>'+ parseFloat(body.response.stats.ratio) + '</td></tr>')
+            response = {}
+            response.color = 'green'
+            response.room_id = process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0].split('@')[0].split('_')[1]
+            response.notify = true
+            response.message_format = 'html'
+            response.from = botName
+            response.message = $.html()
+            params = querystring.stringify(response)
+            request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
+              if error
+                msg.send error
+            return
       else
         msg.send "Error: response status code was " + res.statusCode
         return
