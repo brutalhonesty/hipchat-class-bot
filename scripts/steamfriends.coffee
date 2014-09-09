@@ -4,6 +4,7 @@
 # Dependencies:
 #   "cheerio": "^0.17.0"
 #   "querystring": "^0.2.0"
+#   "request": "^2.42.0"
 #
 # Configuration:
 #   HUBOT_HIPCHAT_USERNAME - The Bots username to display
@@ -33,6 +34,7 @@ module.exports = (robot) ->
         return
       body = JSON.parse body
       userList = body.list.user
+      msg.send JSON.stringify userList
       $ = cheerio.load('<table></table>')
       $('table').append('<tr><th>Player</th><th>Game</th></tr>')
       for i in userList
@@ -44,6 +46,7 @@ module.exports = (robot) ->
       response.notify = true
       response.message_format = 'html'
       response.message = encodeURIComponent($.html())
+      msg.send JSON.stringify response
       params = querystring.stringify(response)
 
       request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
