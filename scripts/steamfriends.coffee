@@ -34,10 +34,8 @@ module.exports = (robot) ->
         return
       body = JSON.parse body
       userList = body.list.user
-      msg.send JSON.stringify userList
       $ = cheerio.load('<table></table>')
       $('table').append('<tr><th>Player</th><th>Game</th></tr>')
-      msg.send $.html()
       for user in userList
         $('table').append('<tr><td>'+ user.names + '<td>'+ user.games + '</td></td></tr>')
       response = {}
@@ -46,8 +44,8 @@ module.exports = (robot) ->
       response.notify = true
       response.message_format = 'html'
       response.message = encodeURIComponent($.html())
-      msg.send JSON.stringify response
       params = querystring.stringify(response)
-
+      msg.send JSON.stringify params
+      msg.send "#{url}/hubot/hipchat?#{params}"
       request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
         throw error if error
