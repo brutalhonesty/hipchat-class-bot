@@ -36,6 +36,7 @@ module.exports = (robot) ->
       userList = body.list.user
       msg.send JSON.stringify userList
       $ = cheerio.load('<table></table>')
+      msg.send $.html()
       $('table').append('<tr><th>Player</th><th>Game</th></tr>')
       for i in userList
         user = userList[i]
