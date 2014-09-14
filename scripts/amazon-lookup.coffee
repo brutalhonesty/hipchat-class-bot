@@ -46,6 +46,7 @@ module.exports = (robot) ->
       jsonData = parser.toJson(body);
       jsonData = JSON.parse(jsonData);
       productTitle = jsonData['ItemLookupResponse']['Items']['Item']['ItemAttributes']['Title'];
+      productTitle = productTitle.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#40;/g, '(').replace(/&#41;/g, ')');
       offerOptions = {
         host: 'webservices.amazon.com',
         path: '/onca/xml?Service=AWSECommerceService&Operation=ItemLookup&ResponseGroup=Offers&IdType=ASIN&ItemId='+msg.match[1]+'&AssociateTag=foobar'
