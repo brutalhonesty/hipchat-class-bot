@@ -21,6 +21,7 @@
     "url": "https://github.com/github/hubot.git"
   },
   "dependencies": {
+    "aws2": "^0.1.5",
     "cheerio": "^0.17.0",
     "hubot": ">= 2.6.0 < 3.0.0",
     "hubot-hipchat": "^2.7.5",
