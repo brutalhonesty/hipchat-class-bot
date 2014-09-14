@@ -2,7 +2,8 @@
 #   Gets the product and price information for a given Amazon product.
 #
 # Dependencies:
-#  "aws2": "^0.1.5"
+#  "aws2": "^0.1.5",
+#  "xml2json": "^0.5.1"
 #
 # Configuration:
 #   HUBOT_AWS_ACCESS_KEY_ID - Your AWS Access Key Id
@@ -15,12 +16,12 @@
 #   brutalhonesty
 
 aws2  = require 'aws2'
+parser = require 'xml2json'
 
 module.exports = (robot) ->
 
   robot.hear /(?:http|https):\/\/(?:www.)?(?:smile.)?(?:amazon|amzn).com(?:\/.*){0,1}(?:\/dp\/|\/gp\/product\/)(.*)\//i, (msg) ->
 
-    msg.send 'Hello world'
     unless process.env.HUBOT_AWS_ACCESS_KEY_ID
       msg.send "Please set the HUBOT_AWS_ACCESS_KEY_ID environment variable."
       return
@@ -29,10 +30,41 @@ module.exports = (robot) ->
       return
     lookupOptions = {
       host: 'webservices.amazon.com',
-      path: '/onca/xml?Service=AWSECommerceService&Operation=ItemLookup&ItemId='+msg.match[0]+'&AssociateTag=foobar',
-    }
+      path: '/onca/xml?Service=AWSECommerceService&Operation=ItemLookup&ItemId='+msg.match[1]+'&AssociateTag=foobar',
+    };
     aws2.sign(lookupOptions, {
       accessKeyId: process.env.HUBOT_AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.HUBOT_AWS_SECRET_ACCESS_KEY
     });
-    msg.send JSON.stringify(lookupOptions);
+    msg.http("https://" + lookupOptions.host)
+    .path(lookupOptions.path)
+    .header("Accept", "application/xml")
+    .get() (err, res, body) ->
+      if err
+        msg.send err
+        return
+      jsonData = parser.toJson(body);
+      jsonData = JSON.parse(jsonData);
+      productTitle = jsonData['ItemLookupResponse']['Items']['Item']['ItemAttributes']['Title'];
+      offerOptions = {
+        host: 'webservices.amazon.com',
+        path: '/onca/xml?Service=AWSECommerceService&Operation=ItemLookup&ResponseGroup=Offers&IdType=ASIN&ItemId='+msg.match[1]+'&AssociateTag=foobar'
+      };
+      aws2.sign(offerOptions, {
+        accessKeyId: process.env.HUBOT_AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.HUBOT_AWS_SECRET_ACCESS_KEY
+      });
+      msg.http("https://" + offerOptions.host)
+      .path(offerOptions.path)
+      .header("Accept", "application/xml")
+      .get() (err, res, body) ->
+        if err
+          msg.send err
+          return
+        jsonData = parser.toJson(body);
+        jsonData = JSON.parse(jsonData);
+        productNewPrice = jsonData['ItemLookupResponse']['Items']['Item']['OfferSummary']['LowestNewPrice']['FormattedPrice'];
+        productNewInventory = jsonData['ItemLookupResponse']['Items']['Item']['OfferSummary']['TotalNew'];
+        productUsedPrice = jsonData['ItemLookupResponse']['Items']['Item']['OfferSummary']['LowestUsedPrice']['FormattedPrice'];
+        productUsedInventory = jsonData['ItemLookupResponse']['Items']['Item']['OfferSummary']['TotalUsed'];
+        msg.send productTitle + ': ' + productNewInventory + ' @ ' + productNewPrice + ', ' + productUsedInventory + ' @ ' + productUsedPrice
