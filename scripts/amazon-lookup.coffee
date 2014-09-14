@@ -31,8 +31,8 @@ module.exports = (robot) ->
     host: 'webservices.amazon.com',
     path: '/onca/xml?Service=AWSECommerceService&Operation=ItemLookup&ItemId='+msg.match[0]+'&AssociateTag=foobar',
   }
-  aws2.sign(options, {
+  aws2.sign(lookupOptions, {
     accessKeyId: process.env.HUBOT_AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.HUBOT_AWS_SECRET_ACCESS_KEY
   });
-  msg.send JSON.stringify(options);
+  msg.send JSON.stringify(lookupOptions);
