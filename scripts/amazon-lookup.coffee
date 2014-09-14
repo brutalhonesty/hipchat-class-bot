@@ -68,4 +68,4 @@ module.exports = (robot) ->
         productNewInventory = jsonData['ItemLookupResponse']['Items']['Item']['OfferSummary']['TotalNew'];
         productUsedPrice = jsonData['ItemLookupResponse']['Items']['Item']['OfferSummary']['LowestUsedPrice']['FormattedPrice'];
         productUsedInventory = jsonData['ItemLookupResponse']['Items']['Item']['OfferSummary']['TotalUsed'];
-        msg.send productTitle + ': ' + productNewInventory + ' @ ' + productNewPrice + ', ' + productUsedInventory + ' @ ' + productUsedPrice
+        msg.send productTitle + ': ' + productNewInventory + ' new @ ' + productNewPrice + ', ' + productUsedInventory + ' used @ ' + productUsedPrice
