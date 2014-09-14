@@ -17,7 +17,7 @@
 aws2  = require 'aws2'
 
 module.exports = (robot) ->
-  robot.hear /(?:http|https):\/\/(?:www.)?(?:smile.)?(?:amazon|amzn).com(?:\/.*){0,1}(?:\/dp\/|\/gp\/product\/)(.*)\//, (msg) ->
+  robot.hear /http:\/\/www.amazon.com/i, (msg) ->
     unless process.env.HUBOT_AWS_ACCESS_KEY_ID
       msg.send "Please set the HUBOT_AWS_ACCESS_KEY_ID environment variable."
       return
