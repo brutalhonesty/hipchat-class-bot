@@ -51,7 +51,6 @@ module.exports = (robot) ->
       for room in body.rooms
         if room.xmpp_jid is process.env.HUBOT_HIPCHAT_ROOMS.split(',')[0]
           roomName = room.name
-          msg.send "Room name via hipchat API is: " + roomName
       unless roomName
         msg.send "Could not find the room name."
         return
@@ -68,7 +67,6 @@ module.exports = (robot) ->
         $('table').append('<tr><th>Player</th><th>Game</th></tr>')
         for user in userList
           $('table').append('<tr><td>'+ user.names + '</td><td>'+ user.games + '</td></tr>')
-        msg.send "Room name from Steam request is: " + roomName
         response = {}
         response.color = 'green'
         response.room_id = roomName

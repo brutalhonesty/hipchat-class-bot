@@ -69,49 +69,49 @@ module.exports = (robot) ->
       unless roomName
         msg.send "Could not find the room name."
         return
-    msg.http("https://what.cd")
-    .path("/login.php")
-    .header("Accept", "*/*")
-    .header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
-    .post(params) (err, res, body) ->
-      if err
-        msg.send err
-        return
-      if res.statusCode is 302
-        cookie = res.headers["set-cookie"][1]
-        msg.http("https://what.cd")
-        .path("/ajax.php?action=top10")
-        .header("Accept", "application/json, */*")
-        .header("Cookie", cookie)
-        .get() (err, res, body) ->
-          if err
-            msg.send err
-            return
-          body = JSON.parse body
-          if body.status is "failure"
-            msg.send body.error
-            return
-          for resp in body.response
-            if resp.tag is "day"
-              $ = cheerio.load('<table></table>')
-              $('table').append('<tr><th>Artist</th><th>Album</th><th>Format</th><th>Encoding</th><th>Seeders</th><th>Leechers</th></tr>')
-              for album in resp.results
-                $('table').append('<tr><td>'+ album.artist + '</td><td>' + album.groupName + '</td><td>'+ album.format + '</td><td>'+ album.encoding + '</td><td>'+ album.seeders + '</td><td>'+ album.leechers + '</td></tr>')
-              response = {}
-              response.color = 'green'
-              response.room_id = roomName
-              response.notify = true
-              response.message_format = 'html'
-              response.from = botName
-              response.message = $.html()
-              params = querystring.stringify(response)
-              request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
-                if error
-                  msg.send error
+      msg.http("https://what.cd")
+      .path("/login.php")
+      .header("Accept", "*/*")
+      .header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
+      .post(params) (err, res, body) ->
+        if err
+          msg.send err
+          return
+        if res.statusCode is 302
+          cookie = res.headers["set-cookie"][1]
+          msg.http("https://what.cd")
+          .path("/ajax.php?action=top10")
+          .header("Accept", "application/json, */*")
+          .header("Cookie", cookie)
+          .get() (err, res, body) ->
+            if err
+              msg.send err
               return
-      else
-        msg.send "Error: response status code was " + res.statusCode
-        return
+            body = JSON.parse body
+            if body.status is "failure"
+              msg.send body.error
+              return
+            for resp in body.response
+              if resp.tag is "day"
+                $ = cheerio.load('<table></table>')
+                $('table').append('<tr><th>Artist</th><th>Album</th><th>Format</th><th>Encoding</th><th>Seeders</th><th>Leechers</th></tr>')
+                for album in resp.results
+                  $('table').append('<tr><td>'+ album.artist + '</td><td>' + album.groupName + '</td><td>'+ album.format + '</td><td>'+ album.encoding + '</td><td>'+ album.seeders + '</td><td>'+ album.leechers + '</td></tr>')
+                response = {}
+                response.color = 'green'
+                response.room_id = roomName
+                response.notify = true
+                response.message_format = 'html'
+                response.from = botName
+                response.message = $.html()
+                params = querystring.stringify(response)
+                request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
+                  if error
+                    msg.send error
+                return
+        else
+          msg.send "Error: response status code was " + res.statusCode
+          return
 
   robot.respond /whatcd user (\w+)$/i, (msg) ->
     unless username and password
@@ -150,31 +150,18 @@ module.exports = (robot) ->
       unless roomName
         msg.send "Could not find the room name."
         return
-    msg.http("https://what.cd")
-    .path("/login.php")
-    .header("Accept", "*/*")
-    .header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
-    .post(params) (err, res, body) ->
-      if err
-        msg.send err
-        return
-      if res.statusCode is 302
-        cookie = res.headers["set-cookie"][1]
-        msg.http("https://what.cd")
-        .path("/ajax.php?action=usersearch&search=" + msg.match[1])
-        .header("Accept", "application/json")
-        .header("Cookie", cookie)
-        .get() (err, res, body) ->
-          if err
-            msg.send err
-            return
-          body = JSON.parse body
-          if body.status is "failure"
-            msg.send body.error
-            return
-          userId = body.response.results[0].userId
+      msg.http("https://what.cd")
+      .path("/login.php")
+      .header("Accept", "*/*")
+      .header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
+      .post(params) (err, res, body) ->
+        if err
+          msg.send err
+          return
+        if res.statusCode is 302
+          cookie = res.headers["set-cookie"][1]
           msg.http("https://what.cd")
-          .path("/ajax.php?action=user&id=" + userId)
+          .path("/ajax.php?action=usersearch&search=" + msg.match[1])
           .header("Accept", "application/json")
           .header("Cookie", cookie)
           .get() (err, res, body) ->
@@ -185,21 +172,34 @@ module.exports = (robot) ->
             if body.status is "failure"
               msg.send body.error
               return
-            $ = cheerio.load('<table></table>')
-            $('table').append('<tr><th>Rank</th><th>Upload</th><th>Download</th><th>Ratio</th></tr>')
-            $('table').append('<tr><td>'+ body.response.personal.class + '</td><td>' + parseInt(body.response.stats.uploaded) / 1024 / 1024 / 1024 + ' GB</td><td>'+ parseInt(body.response.stats.downloaded) / 1024 / 1024 / 1024 + ' GB</td><td>'+ parseFloat(body.response.stats.ratio) + '</td></tr>')
-            response = {}
-            response.color = 'green'
-            response.room_id = roomName
-            response.notify = true
-            response.message_format = 'html'
-            response.from = botName
-            response.message = $.html()
-            params = querystring.stringify(response)
-            request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
-              if error
-                msg.send error
-            return
-      else
-        msg.send "Error: response status code was " + res.statusCode
-        return
+            userId = body.response.results[0].userId
+            msg.http("https://what.cd")
+            .path("/ajax.php?action=user&id=" + userId)
+            .header("Accept", "application/json")
+            .header("Cookie", cookie)
+            .get() (err, res, body) ->
+              if err
+                msg.send err
+                return
+              body = JSON.parse body
+              if body.status is "failure"
+                msg.send body.error
+                return
+              $ = cheerio.load('<table></table>')
+              $('table').append('<tr><th>Rank</th><th>Upload</th><th>Download</th><th>Ratio</th></tr>')
+              $('table').append('<tr><td>'+ body.response.personal.class + '</td><td>' + parseInt(body.response.stats.uploaded) / 1024 / 1024 / 1024 + ' GB</td><td>'+ parseInt(body.response.stats.downloaded) / 1024 / 1024 / 1024 + ' GB</td><td>'+ parseFloat(body.response.stats.ratio) + '</td></tr>')
+              response = {}
+              response.color = 'green'
+              response.room_id = roomName
+              response.notify = true
+              response.message_format = 'html'
+              response.from = botName
+              response.message = $.html()
+              params = querystring.stringify(response)
+              request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
+                if error
+                  msg.send error
+              return
+        else
+          msg.send "Error: response status code was " + res.statusCode
+          return
