@@ -55,28 +55,28 @@ module.exports = (robot) ->
       unless roomName
         msg.send "Could not find the room name."
         return
-    msg.http("http://steamfriends-brutalhonesty.rhcloud.com/getFriends")
-    .header("Accept", "application/json")
-    .query(type: "json", steamid: msg.match[1])
-    .get() (err, res, body) ->
-      if err
-        msg.send err
-        return
-      body = JSON.parse body
-      userList = body.list.user
-      $ = cheerio.load('<table></table>')
-      $('table').append('<tr><th>Player</th><th>Game</th></tr>')
-      for user in userList
-        $('table').append('<tr><td>'+ user.names + '</td><td>'+ user.games + '</td></tr>')
-      msg.send "Room name from Steam request is: " + roomName
-      response = {}
-      response.color = 'green'
-      response.room_id = roomName
-      response.notify = true
-      response.message_format = 'html'
-      response.from = botName
-      response.message = $.html()
-      params = querystring.stringify(response)
-      request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
-        if error
-          msg.send error
+      msg.http("http://steamfriends-brutalhonesty.rhcloud.com/getFriends")
+      .header("Accept", "application/json")
+      .query(type: "json", steamid: msg.match[1])
+      .get() (err, res, body) ->
+        if err
+          msg.send err
+          return
+        body = JSON.parse body
+        userList = body.list.user
+        $ = cheerio.load('<table></table>')
+        $('table').append('<tr><th>Player</th><th>Game</th></tr>')
+        for user in userList
+          $('table').append('<tr><td>'+ user.names + '</td><td>'+ user.games + '</td></tr>')
+        msg.send "Room name from Steam request is: " + roomName
+        response = {}
+        response.color = 'green'
+        response.room_id = roomName
+        response.notify = true
+        response.message_format = 'html'
+        response.from = botName
+        response.message = $.html()
+        params = querystring.stringify(response)
+        request "#{url}/hubot/hipchat?#{params}", (error, response, body) ->
+          if error
+            msg.send error
