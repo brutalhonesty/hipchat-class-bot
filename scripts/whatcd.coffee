@@ -10,8 +10,8 @@
 # Configuration:
 #   HUBOT_WHAT_CD_USERNAME - Your What.cd username
 #   HUBOT_WHAT_CD_PASSWORD - Your What.cd password
-#   HUBOT_HIPCHAT_USERNAME - The Bots username to display
-#   HUBOT_HIPCHAT_ROOMS - The rooms the bot is assigned to
+#   HUBOT_HIPCHAT_USERNAME - The bot username to display.
+#   HUBOT_HIPCHAT_ROOMS - The rooms the bot is assigned to.
 #   HUBOT_HIPCHAT_TOKEN - The hipchat auth token.
 #   HEROKU_URL - The url of the bot server.
 #
