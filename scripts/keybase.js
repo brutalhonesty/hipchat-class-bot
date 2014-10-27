@@ -1,25 +1,25 @@
-# Description:
-#   Gets the daily top10 torrents and looks up a user on What.cd
-#
-# Dependencies:
-#   "scrypt": "^3.0.1"
-#
-# Configuration:
-#   HUBOT_KEYBASE_EMAIL_OR_USERNAME - Your Keybase.io Username or Email
-#   HUBOT_KEYBASE_PASSWORD - Your Keybase.io Password
-#
-# Commands:
-#   hubot keybase user keybase <username> - Looks up the Keybase.io username requested.
-#   hubot keybase user domain <domain> - Looks up the Keybase.io username requested based on a domain.
-#   hubot keybase user twitter <username> - Looks up the Keybase.io username requested based on a domain.
-#   hubot keybase user github <username> - Looks up the Keybase.io username requested based on a domain.
-#   hubot keybase user reddit <username> - Looks up the Keybase.io username requested based on a domain.
-#   hubot keybase user hackernews <username> - Looks up the Keybase.io username requested based on a domain.
-#   hubot keybase user coinbase <username> - Looks up the Keybase.io username requested based on a domain.
-#   hubot keybase login - Logs the Keybase.io username in and returns the session.
-#
-# Author:
-#   brutalhonesty
+// Description:
+//   Gets the daily top10 torrents and looks up a user on What.cd
+//
+// Dependencies:
+//   "scrypt": "^3.0.1"
+//
+// Configuration:
+//   HUBOT_KEYBASE_EMAIL_OR_USERNAME - Your Keybase.io Username or Email
+//   HUBOT_KEYBASE_PASSWORD - Your Keybase.io Password
+//
+// Commands:
+//   hubot keybase user keybase <username> - Looks up the Keybase.io username requested.
+//   hubot keybase user domain <domain> - Looks up the Keybase.io username requested based on a domain.
+//   hubot keybase user twitter <username> - Looks up the Keybase.io username requested based on a domain.
+//   hubot keybase user github <username> - Looks up the Keybase.io username requested based on a domain.
+//   hubot keybase user reddit <username> - Looks up the Keybase.io username requested based on a domain.
+//   hubot keybase user hackernews <username> - Looks up the Keybase.io username requested based on a domain.
+//   hubot keybase user coinbase <username> - Looks up the Keybase.io username requested based on a domain.
+//   hubot keybase login - Logs the Keybase.io username in and returns the session.
+//
+// Author:
+//   brutalhonesty
 
 var scrypt = require('scrypt');
 var crypto = require('crypto');
