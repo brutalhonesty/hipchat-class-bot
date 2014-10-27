@@ -28,6 +28,7 @@
     "hubot-scripts": ">= 2.5.0 < 3.0.0",
     "querystring": "^0.2.0",
     "request": "^2.42.0",
+    "scrypt": "^3.0.1",
     "xml2json": "^0.5.1"
   },
   "engines": {
