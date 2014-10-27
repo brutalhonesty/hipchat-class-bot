@@ -9,8 +9,8 @@
 #   HUBOT_KEYBASE_PASSWORD - Your Keybase.io Password
 #
 # Commands:
-#   hubot keybase user <username> - Looks up the Keybase.io username requested.
-#   hubot keybase user domain <username> - Looks up the Keybase.io username requested based on a domain.
+#   hubot keybase user keybase <username> - Looks up the Keybase.io username requested.
+#   hubot keybase user domain <domain> - Looks up the Keybase.io username requested based on a domain.
 #   hubot keybase user twitter <username> - Looks up the Keybase.io username requested based on a domain.
 #   hubot keybase user github <username> - Looks up the Keybase.io username requested based on a domain.
 #   hubot keybase user reddit <username> - Looks up the Keybase.io username requested based on a domain.
@@ -80,5 +80,61 @@ module.exports = function(robot) {
           msg.send(body.status.des);
         }
       });
+  });
+
+  return robot.respond(/keybase user (keybase|domain|github|twitter|reddit|hackernews|coinbase) (\w+)$/i, function(msg) {
+    if(msg.match[1] === 'keybase') {
+      var lookupType = 'usernames';
+    } else {
+      lookupType = msg.match[1];
+    }
+    msg.http('https://keybase.io')
+    .path('/_/api/1.0/user/lookup.json?'+lookupType+'=' + msg.match[2])
+    .get()(function (err, res, body) {
+        if(err) {
+          msg.send(err);
+          return;
+        }
+        body = JSON.parse(body);
+        if(body.status.code === 0) {
+          msg.send("User " + body.them[0].basics.username + " (" + body.them[0].profile.full_name + ") from " + body.them[0].profile.location);
+          var proofTypes = body.them[0].proofs_summary.by_proof_type;
+          if(proofTypes.twitter) {
+            for (var i = 0; i < proofTypes.twitter.length; i++) {
+              msg.send("Twitter: " + proofTypes.twitter[i].nametag);
+            }
+          }
+          if(proofTypes.github) {
+            for (var i = 0; i < proofTypes.github.length; i++) {
+              msg.send("Github: " + proofTypes.github[i].nametag);
+            }
+          }
+          if(proofTypes.reddit) {
+            for (var i = 0; i < proofTypes.reddit.length; i++) {
+              msg.send("Reddit: " + proofTypes.reddit[i].nametag);
+            }
+          }
+          if(proofTypes.coinbase) {
+            for (var i = 0; i < proofTypes.coinbase.length; i++) {
+              msg.send("CoinBase: " + proofTypes.coinbase[i].nametag);
+            }
+          }
+          if(proofTypes.hackernews) {
+            for (var i = 0; i < proofTypes.hackernews.length; i++) {
+              msg.send("Hacker News: " + proofTypes.hackernews[i].nametag);
+            }
+          }
+          if(proofTypes.generic_web_site) {
+            for (var i = 0; i < proofTypes.generic_web_site.length; i++) {
+              msg.send("Website: " + proofTypes.generic_web_site[i].nametag);
+            }
+          }
+          if(proofTypes.dns) {
+            for (var i = 0; i < proofTypes.dns.length; i++) {
+              msg.send("DNS: " + proofTypes.dns[i].nametag);
+            }
+          }
+        }
+    });
   });
 }
