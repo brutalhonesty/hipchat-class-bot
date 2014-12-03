@@ -57,7 +57,7 @@ module.exports = function(robot) {
               bytes.push(parseInt(salt.substr(i, 2), 16));
           }
           var binarySalt = String.fromCharCode.apply(String, bytes);
-          scrypt.kdf(password, {N: Math.pow(2,15), r:8, p:1}, 224, binarySalt, function(err, result){
+          scrypt.kdf(password, {N: Math.pow(2,15), r:8, p:1}, 224, binarySalt, function (err, result) {
             var hash = crypto.createHmac('sha512', result.hash.slice(192, 224));
             hash.update(new Buffer(loginSession, 'base64'));
             var hashed_data = hash.digest('hex');
@@ -76,6 +76,7 @@ module.exports = function(robot) {
                 msg.send(body.status.des);
               }
             });
+          });
         } else {
           msg.send(body.status.des);
         }
