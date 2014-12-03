@@ -24,7 +24,7 @@
 var scrypt = require('scrypt');
 var crypto = require('crypto');
 var username = process.env.HUBOT_KEYBASE_EMAIL_OR_USERNAME;
-var password process.env.HUBOT_KEYBASE_PASSWORD;
+var password = process.env.HUBOT_KEYBASE_PASSWORD;
 
 scrypt.kdf.config.saltEncoding = "ascii";
 scrypt.kdf.config.keyEncoding = "ascii";
